@@ -1,0 +1,29 @@
+
+# Ignore everything
+
+# Dependencies
+venv/
+
+#  Environment and secrets
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Git history
+.git/
+
+# Tests
+tests/
+.pytest_cache/
+
+# README and documentation files
+*.md
+
+# Logs
+logs/
+
+# Project configuration folder
+.idea/
+

@@ -8,15 +8,12 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    email = Column(String, nullable = False, unique= True), index=True
+    first_name = Column(String, nullable=True) # added this via Alembic to practice migrations
+    last_name = Column(String, nullable=True) # added this via Alembic to practice migrations
+    email = Column(String, nullable = False, unique= True, index=True)
     hashed_password = Column(String, nullable= False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    # Since the User can have more tha one portfolio I define the relationship with the variable postfolios
-    portfolios = relationship("Portfolio", back_populates="owner") # one user - many portfolios -> one to many
-    # This allows me to user user.portfolios to access Postfolio objects
-    # The relationship is created with the ForeignKey
-    # back_populates = creates the connects the relationships
-
-    # I'm creating a relationship between the User and Posrtfolio, and the name of this relationship is owner
-    # since a User can have many portfolios I'll name this variable 'posrfolios'
+   
+    # Relationship -> describes the relatioship between the portfolio model and its owner
+    portfolios= relationship("Portfolio", back_populates="owner", cascade="all, delete-orphan")

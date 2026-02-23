@@ -1,0 +1,222 @@
+# 📈 Portfolio Analyzer API
+
+A production-ready REST API built with FastAPI for analyzing and optimizing stock portfolios. Designed with fintech best practices including JWT authentication, database migrations, comprehensive logging, and full Docker support.
+
+---
+
+## 🚀 Features
+
+- **JWT Authentication** — Secure user registration and login with token-based auth
+- **Portfolio Management** — Create and manage multiple portfolios per user
+- **Holdings Tracking** — Add and manage stock holdings with purchase price and shares
+- **Financial Analysis** — Per-portfolio metrics including annualized return and volatility, Sharpe ratio, maximum drawdown, cumulative returns, and correlation and covariance matrices
+- **Portfolio Optimization** — Scipy-powered optimization for maximum Sharpe ratio and minimum volatility allocations
+- **Market Data Integration** — Live and historical price data via yfinance
+- **Production-Ready Logging** — Rotating file handlers with security-conscious log sanitization
+- **Database Migrations** — Full Alembic migration history for reproducible schema management
+- **Comprehensive Test Suite** — pytest with httpx, full transaction rollback isolation, mocked external APIs
+
+---
+
+## 🛠 Tech Stack
+
+| Technology | Purpose |
+|------------|---------|
+| FastAPI | Web framework |
+| SQLAlchemy 2.0 | ORM |
+| PostgreSQL | Database |
+| Pydantic v2 | Data validation |
+| Alembic | Database migrations |
+| PyJWT + pwdlib | Authentication |
+| yfinance | Market data |
+| scipy | Portfolio optimization |
+| pytest + httpx | Testing |
+| Docker + Compose | Containerization |
+| Python 3.12 | Runtime |
+
+**Planned:**
+- AWS EC2 + RDS deployment
+- GitHub Actions CI/CD
+- SlowAPI rate limiting
+- Sentry error tracking
+
+---
+
+## 📦 Getting Started
+
+### Prerequisites
+
+- Docker Desktop installed and running
+- Git
+
+### Installation
+
+**1. Clone the repository**
+```bash
+git clone https://github.com/your-username/portfolio-api.git
+cd portfolio-api
+```
+
+**2. Configure environment variables**
+```bash
+cp .env.example .env
+```
+
+Open `.env` and fill in your values:
+```dotenv
+DATABASE_HOSTNAME=db
+DATABASE_PORT=5432
+DATABASE_PASSWORD=yourpassword
+DATABASE_NAME=portfolio_db
+DATABASE_NAME_TEST=test_db
+DATABASE_USERNAME=postgres
+SECRET_KEY=your-secret-key-here
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+```
+
+**3. Start the application**
+```bash
+docker compose up
+```
+
+Alembic migrations run automatically on startup. The API will be available at `http://localhost:8000`.
+
+Interactive API documentation (Swagger UI): `http://localhost:8000/docs`
+
+---
+
+## 🗂 Project Structure
+
+```
+portfolio-api/
+├── app/
+│   ├── crud/                # Database query functions
+│   ├── models/              # SQLAlchemy ORM models
+│   ├── routers/             # API route handlers
+│   ├── schemas/             # Pydantic request/response schemas
+│   ├── services/            # Business logic (financial analysis)
+│   ├── config.py            # Pydantic settings, environment variable loading
+│   ├── database.py          # SQLAlchemy engine and session management
+│   ├── dependencies.py      # Shared FastAPI dependencies
+│   ├── logger.py            # Logging configuration with rotating file handlers
+│   ├── main.py              # FastAPI app entry point, router registration
+│   ├── oauth2.py            # JWT token creation and verification
+│   └── utils.py             # Shared utility functions
+├── alembic/                 # Database migrations
+├── tests/                   # pytest test suite
+├── Dockerfile
+├── docker-compose.yml
+├── entrypoint.sh            # Runs migrations then starts Uvicorn
+├── .env.example
+├── .dockerignore
+├── alembic.ini
+└── requirements.txt
+```
+
+---
+
+## 🔑 API Overview
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/auth/login` | Login, receive JWT token | No |
+| POST | `/users` | Register new user | No |
+| GET | `/users/{id}` | Get user details | Yes |
+| GET | `/portfolios` | List user portfolios | Yes |
+| POST | `/portfolios` | Create portfolio | Yes |
+| DELETE | `/portfolios/{id}` | Delete portfolio | Yes |
+| GET | `/portfolios/{id}/holdings` | List holdings | Yes |
+| POST | `/portfolios/{id}/holdings` | Add holding | Yes |
+| DELETE | `/holdings/{id}` | Remove holding | Yes |
+| POST | `/portfolios/{id}/analyze` | Run full analysis | Yes |
+| GET | `/portfolios/{id}/analysis` | Get latest analysis | Yes |
+
+---
+
+## 🧪 Running Tests
+
+Tests use an isolated test database with full transaction rollback between tests. External APIs (yfinance) are mocked.
+
+```bash
+pytest          # run all tests
+pytest -v       # verbose output
+pytest tests/test_portfolios.py -v  # specific file
+```
+
+---
+
+## 🐳 Docker Commands
+
+```bash
+docker compose up           # start all services
+docker compose up -d        # detached mode
+docker compose down         # stop all services
+docker compose down -v      # stop and wipe database volume
+docker compose up --build   # rebuild after code changes
+docker compose logs app     # view application logs
+docker compose exec app bash  # shell inside container
+```
+
+---
+
+## 🗄 Database Migrations
+
+```bash
+alembic upgrade head                              # apply all migrations
+alembic revision --autogenerate -m "description"  # generate new migration
+alembic current                                   # check current state
+alembic history                                   # view full history
+alembic downgrade -1                              # revert last migration
+```
+
+Migrations run automatically when starting via Docker.
+
+---
+
+## 🔒 Security
+
+- Passwords hashed with Argon2 via pwdlib
+- JWT tokens with configurable expiry
+- Non-root user inside Docker container
+- Secrets managed via environment variables — never committed to version control
+- Sensitive data (emails, passwords, tokens) excluded from application logs
+
+---
+
+## 🗄 Database Schema
+
+Six tables with cascading foreign key relationships:
+
+- **users** — Authentication and user management
+- **portfolios** — User-owned portfolio containers
+- **holdings** — Individual stock positions within portfolios
+- **analysis_results** — Portfolio-level financial metrics
+- **ticker_metrics** — Per-ticker metrics within an analysis
+- **optimized_allocations** — Optimization results per ticker per analysis
+
+---
+
+## 📋 Environment Variables
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `DATABASE_HOSTNAME` | Database host (`db` for Docker) | `db` |
+| `DATABASE_PORT` | PostgreSQL port | `5432` |
+| `DATABASE_USERNAME` | PostgreSQL username | `postgres` |
+| `DATABASE_PASSWORD` | PostgreSQL password | `yourpassword` |
+| `DATABASE_NAME` | Main database name | `portfolio_db` |
+| `DATABASE_NAME_TEST` | Test database name | `test_db` |
+| `SECRET_KEY` | JWT signing secret | `your-secret-key` |
+| `ALGORITHM` | JWT algorithm | `HS256` |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | Token expiry in minutes | `30` |
+
+---
+
+## 🗺 Roadmap
+
+- [ ] AWS deployment (EC2 + RDS)
+- [ ] GitHub Actions CI/CD pipeline
+- [ ] Sentry error tracking
+- [ ] SlowAPI rate limiting
+- [ ] Frontend dashboard
