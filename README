@@ -28,7 +28,8 @@ A production-ready REST API built with FastAPI for analyzing and optimizing stoc
 | Pydantic v2 | Data validation |
 | Alembic | Database migrations |
 | PyJWT + pwdlib | Authentication |
-| yfinance | Market data |
+| yfinance | Test mocking |
+| Alpha Vantage API | Market data |
 | scipy | Portfolio optimization |
 | pytest + httpx | Testing |
 | Docker + Compose | Containerization |
