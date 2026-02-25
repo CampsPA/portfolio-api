@@ -5,8 +5,9 @@ from ..oauth2 import get_current_user
 from ..database import get_db
 from sqlalchemy.orm import Session
 from ..crud import holding
-import yfinance as yf
 import logging
+import requests
+from ..config import settings
 
 
 # Get a logger instance
@@ -14,19 +15,29 @@ logger = logging.getLogger("app.routers.holdings")
 
 router = APIRouter(tags=['Holdings'])
 
-# Get current price
-def get_current_price(ticker):
-    stock = yf.Ticker(ticker)
-    price = stock.info.get("currentPrice") or stock.info.get("regularMarketPrice")
 
-    if not price:
-        logger.info("Current price data not found.")
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"current_price no found.")
+def get_current_price(ticker):
+    api_key = settings.alpha_vantage_api_key
+    url = f"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={ticker}&apikey={api_key}"
     
-    logger.info("Current prices successfully found.")
+    try:
+        response = requests.get(url)
+        data = response.json()
+        price = data["Global Quote"]["05. price"]
+
+        if not price:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail=f"Price data not found for {ticker}")
+        
+        logger.info("Current price successfully found.")
+        return float(price)
     
-    return price
+    except Exception as e:
+        logger.error(f"Failed to fetch price for {ticker}: {e}")
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                            detail=f"Could not fetch price for {ticker}")
+
+
 
 # Add a holding to a portfolio
 @router.post("/{portfolio_id}/holdings", status_code=status.HTTP_201_CREATED, response_model=HoldingResponse)

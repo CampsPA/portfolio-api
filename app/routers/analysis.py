@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, status, HTTPException
-from ..schemas.analysis import  AnalysisResponse, TickerMetricResponse, OptimizedAllocationResponse
+from ..schemas.analysis import  AnalysisResponse
 from ..oauth2 import get_current_user
 from ..database import get_db
 from sqlalchemy.orm import Session

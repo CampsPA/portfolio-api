@@ -5,7 +5,6 @@
 # add columns migrations - alembic revision --autogenerate -m "add first_name to users"
 
 from fastapi import FastAPI
-from . database import engine, Base
 from .routers import analysis, auth, holdings, portfolios, users
 from fastapi.middleware.cors import CORSMiddleware
 import logging
