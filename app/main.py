@@ -24,7 +24,7 @@ logger = logging.getLogger("app.main")
 
 # Initialize the App
 app = FastAPI(
-    title="Portfolio Analyzer API",
+    title="Portfolio Analyzer API Tool",
     description="Analyze and optimize stock portfolios",
     version="0.1.0"
 )
