@@ -43,7 +43,7 @@ app.add_middleware(
 
 @app.get("/")
 def root():
-    return {"message" : "Portfolio Analyzer API Tool"}
+    return {"message" : "Portfolio Analyzer API"}
 
 # link routes
 # The analysis and holdings require to be prefixed under portfolios since they are nested uder portfolios
