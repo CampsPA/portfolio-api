@@ -24,7 +24,7 @@ logger = logging.getLogger("app.main")
 
 # Initialize the App
 app = FastAPI(
-    title="Portfolio Analyzer API Tool",
+    title="Portfolio Analyzer API",
     description="Analyze and optimize stock portfolios",
     version="0.1.0"
 )
@@ -43,7 +43,7 @@ app.add_middleware(
 
 @app.get("/")
 def root():
-    return {"message" : "Portfolio Analyzer API"}
+    return {"message" : "Portfolio Analyzer API Tool"}
 
 # link routes
 # The analysis and holdings require to be prefixed under portfolios since they are nested uder portfolios
