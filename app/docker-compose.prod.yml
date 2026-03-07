@@ -1,10 +1,11 @@
+
 services:
   app:
     build: .
     ports: 
       - "8000:8000"
     environment:
-      - DATABASE_HOSTNAME=db # hardcode, not a reference
+      - DATABASE_HOSTNAME=${DATABASE_HOSTNAME}
       - DATABASE_PORT=${DATABASE_PORT}
       - DATABASE_PASSWORD=${DATABASE_PASSWORD} 
       - DATABASE_NAME=${DATABASE_NAME}
@@ -14,8 +15,12 @@ services:
       - ALGORITHM=${ALGORITHM}
       - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES}
       - ALPHA_VANTAGE_API_KEY=${ALPHA_VANTAGE_API_KEY}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
     depends_on:
       db:
+        condition: service_healthy
+      redis:
         condition: service_healthy
       
 
@@ -37,5 +42,22 @@ services:
       timeout: 5s # wait 5 seconds for a response before counting as failed
       retries: 5 # try 5 times before making unhealthy
       start_period: 10s # wait 10 seconds before starting health checks.
+
+  redis:
+    image: redis:7.2.1
+    ports: 
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
 volumes:
   postgres_data: # This registers the named volume with Docker Compose.
+
+
+  
+
+

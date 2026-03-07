@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     algorithm: str
     access_token_expire_minutes: int
     alpha_vantage_api_key: str
+    redis_host: str
+    redis_port: str
 
     model_config = SettingsConfigDict(env_file = ".env")
 

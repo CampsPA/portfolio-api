@@ -34,11 +34,12 @@ A production-ready REST API built with FastAPI for analyzing and optimizing stoc
 | pytest + httpx | Testing |
 | Docker + Compose | Containerization |
 | Python 3.12 | Runtime |
+| AWS EC2 + RDS | deployment |
+| GitHub Actions | CI/CD |
+| SlowAPI | rate limiting |
+| Redis | Rate limit storage |
 
 **Planned:**
-- AWS EC2 + RDS deployment
-- GitHub Actions CI/CD
-- SlowAPI rate limiting
 - Sentry error tracking
 
 ---

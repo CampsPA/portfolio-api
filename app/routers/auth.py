@@ -1,5 +1,5 @@
 
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, status, HTTPException, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from ..crud.user import create_user, get_user_by_email
 from ..schemas.user import UserCreate, UserResponse, Token
@@ -8,17 +8,21 @@ from ..utils import verify_password
 from ..database import get_db
 from ..oauth2 import create_access_token
 import logging
+from ..limiter import limiter
+
 
 
 # Get a logger instance
 logger = logging.getLogger("app.routers.auth")
 
 
+
 router = APIRouter(tags=['Authentication'])
 
 # Create register endpoint
 @router.post('/register',response_model=UserResponse)
-def register(user_credentials: UserCreate, db:Session = Depends(get_db)):
+@limiter.limit("5/minute")
+def register(request: Request,user_credentials: UserCreate, db:Session = Depends(get_db)):
     # Check user email, if user exists raise error, if not create user
     existing_user = get_user_by_email(db, user_credentials.email)
     if  existing_user is not None:
@@ -33,7 +37,8 @@ def register(user_credentials: UserCreate, db:Session = Depends(get_db)):
 
 # Create login endpoint
 @router.post('/login', response_model=Token)
-def login(form_data:OAuth2PasswordRequestForm = Depends(), db:Session = Depends(get_db)):
+@limiter.limit("5/minute")
+def login(request: Request,form_data:OAuth2PasswordRequestForm = Depends(), db:Session = Depends(get_db)):
     existing_user = get_user_by_email(db, form_data.username)
     if not existing_user:
         logger.warning("Invalid Credentials") # provide a generic information so an attacker has minimum details

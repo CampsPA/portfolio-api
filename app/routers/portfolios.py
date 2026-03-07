@@ -5,6 +5,10 @@ from ..database import get_db
 from sqlalchemy.orm import Session
 from ..crud import portfolio
 import logging
+# SlowAPI
+from fastapi import Request
+from ..limiter import limiter, get_current_user_key
+
 
 
 # Get a logger instance
@@ -14,14 +18,16 @@ router = APIRouter(tags=['Portfolios'])
 
 # Create portfolio
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=PortfolioResponse)
-def create_portfolio(portfolio_data: PortfolioCreate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+@limiter.limit("100/minute", key_func=get_current_user_key)
+def create_portfolio(request:Request,portfolio_data: PortfolioCreate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
     new_portfolio = portfolio.create_portfolio(db,portfolio_data, current_user.id)
     logger.info(f"Portfolio with id {new_portfolio.id} successfully created for user with id {current_user.id}.")
     return new_portfolio
 
 # List all the portfolios for the user
 @router.get("/", status_code= status.HTTP_200_OK, response_model=list[PortfolioResponse]) # return a list of portfolios
-def get_portfolios(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+@limiter.limit("100/minute", key_func=get_current_user_key)
+def get_portfolios(request:Request,db: Session = Depends(get_db), current_user=Depends(get_current_user)):
     all_portfolios = portfolio.get_portfolios(db, current_user.id)
     logger.info(f"Retrieved {len(all_portfolios)} portfolios with user id {current_user.id}.")
     return all_portfolios
@@ -29,7 +35,8 @@ def get_portfolios(db: Session = Depends(get_db), current_user=Depends(get_curre
 
 # List a single portfolio by user id
 @router.get("/{id}", response_model=PortfolioResponse)
-def get_portfolio_id(id:int, db:Session = Depends(get_db), current_user=Depends(get_current_user)):
+@limiter.limit("100/minute", key_func=get_current_user_key)
+def get_portfolio_id(request:Request,id:int, db:Session = Depends(get_db), current_user=Depends(get_current_user)):
     portfolio_id = portfolio.get_portfolio_by_id(db,id)
 
     if not portfolio_id:
@@ -49,7 +56,8 @@ def get_portfolio_id(id:int, db:Session = Depends(get_db), current_user=Depends(
 
 # Update portfolio
 @router.put("/{id}", response_model=PortfolioResponse)
-def update_portfolio(id:int, portfolio_data : PortfolioUpdate, db:Session = Depends(get_db), current_user=Depends(get_current_user)):
+@limiter.limit("100/minute", key_func=get_current_user_key)
+def update_portfolio(request:Request,id:int, portfolio_data : PortfolioUpdate, db:Session = Depends(get_db), current_user=Depends(get_current_user)):
     
     # Fetch the portfolio by its id, then check ownership
     portfolio_check = portfolio.get_portfolio_by_id(db, id)
@@ -73,7 +81,8 @@ def update_portfolio(id:int, portfolio_data : PortfolioUpdate, db:Session = Depe
 
 # Delete portfolio
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_portfolio(id:int, db:Session = Depends(get_db), current_user=Depends(get_current_user)):
+@limiter.limit("100/minute", key_func=get_current_user_key)
+def delete_portfolio(request:Request,id:int, db:Session = Depends(get_db), current_user=Depends(get_current_user)):
     # Fetch the portfolio by its id, then check ownership
     portfolio_check = portfolio.get_portfolio_by_id(db, id)
 

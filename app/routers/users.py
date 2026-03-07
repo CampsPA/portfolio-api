@@ -5,6 +5,10 @@ from ..database import get_db
 from sqlalchemy.orm import Session
 from ..crud.user import update_user
 import logging
+# SlowAPI
+from fastapi import Request
+from ..limiter import limiter, get_current_user_key
+
 
 
 # Get a logger instance
@@ -19,14 +23,16 @@ router = APIRouter(tags=['Users'])
 # that gets the current user
 # Return the current user
 @router.get("/me", response_model=UserResponse)
-def get_current_user_profile(current_user = Depends(get_current_user)):
+@limiter.limit("100/minute", key_func=get_current_user_key)
+def get_current_user_profile(request:Request,current_user = Depends(get_current_user)):
     logger.info(f"Current user with id {current_user.id} successfully retrieved.")
     return current_user
 
 
 # Update user
 @router.put("/me", response_model=UserResponse)
-def update_user_profile(user_data : UserUpdate, db: Session =Depends(get_db), current_user = Depends(get_current_user)):
+@limiter.limit("100/minute", key_func=get_current_user_key)
+def update_user_profile(request:Request,user_data : UserUpdate, db: Session =Depends(get_db), current_user = Depends(get_current_user)):
     updated_user = update_user(db, current_user.email, user_data)
     logger.info(f"User profile successfully updated for user id {current_user.id}.")
     return updated_user

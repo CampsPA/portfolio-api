@@ -8,6 +8,9 @@ from ..crud import holding
 import logging
 import requests
 from ..config import settings
+# SlowAPI
+from fastapi import Request
+from ..limiter import limiter, get_current_user_key
 
 
 # Get a logger instance
@@ -41,7 +44,8 @@ def get_current_price(ticker):
 
 # Add a holding to a portfolio
 @router.post("/{portfolio_id}/holdings", status_code=status.HTTP_201_CREATED, response_model=HoldingResponse)
-def create_holding(portfolio_id:int, holding_data: HoldingCreate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+@limiter.limit("100/minute", key_func=get_current_user_key)
+def create_holding(request:Request,portfolio_id:int, holding_data: HoldingCreate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
     
     # Fetch portfolio by id
     portfolio_check = portfolio.get_portfolio_by_id(db,portfolio_id)
@@ -74,7 +78,8 @@ def create_holding(portfolio_id:int, holding_data: HoldingCreate, db: Session = 
 
 # List all holdings in a portfolio
 @router.get("/{portfolio_id}/holdings", status_code= status.HTTP_200_OK, response_model=list[HoldingResponse])
-def get_holdings(portfolio_id:int, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+@limiter.limit("100/minute", key_func=get_current_user_key)
+def get_holdings(request:Request,portfolio_id:int, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
     # Fetch portfolio by id
     portfolio_check = portfolio.get_portfolio_by_id(db,portfolio_id)
 
@@ -98,7 +103,8 @@ def get_holdings(portfolio_id:int, db: Session = Depends(get_db), current_user=D
 # Update a specific holding in a portfolio
 # Sice we are acting on an specific holding with need its id along with the portfolio_id
 @router.put("/{portfolio_id}/holdings/{holding_id}", response_model=HoldingResponse)
-def update_holding(portfolio_id:int, holding_id:int, holding_data : HoldingUpdate, db:Session = Depends(get_db), current_user=Depends(get_current_user)):
+@limiter.limit("100/minute", key_func=get_current_user_key)
+def update_holding(request:Request,portfolio_id:int, holding_id:int, holding_data : HoldingUpdate, db:Session = Depends(get_db), current_user=Depends(get_current_user)):
     # Fetch the portfolio by its id, then check ownership
     portfolio_check = portfolio.get_portfolio_by_id(db, portfolio_id)
     # Fetch holdings by its id, then check ownership
@@ -129,7 +135,8 @@ def update_holding(portfolio_id:int, holding_id:int, holding_data : HoldingUpdat
 
 # Delete holding
 @router.delete("/{portfolio_id}/holdings/{holding_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_holding(portfolio_id:int, holding_id:int, db:Session = Depends(get_db), current_user=Depends(get_current_user)):
+@limiter.limit("100/minute", key_func=get_current_user_key)
+def delete_holding(request:Request,portfolio_id:int, holding_id:int, db:Session = Depends(get_db), current_user=Depends(get_current_user)):
     # Fetch the portfolio by its id, then check ownership
     portfolio_check = portfolio.get_portfolio_by_id(db, portfolio_id)
     # Fetch holdings by its id, then check ownership

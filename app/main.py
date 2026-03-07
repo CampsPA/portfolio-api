@@ -4,11 +4,16 @@
 # run: openssl rand -hex 32
 # add columns migrations - alembic revision --autogenerate -m "add first_name to users"
 
+
 from fastapi import FastAPI
 from .routers import analysis, auth, holdings, portfolios, users
 from fastapi.middleware.cors import CORSMiddleware
 import logging
 from .logger import setup_logging
+# SlowAPI
+from .limiter import limiter
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
 
 # Call the logging setup function *before* initializing the FastAPI app or getting other loggers
@@ -30,6 +35,12 @@ app = FastAPI(
 )
 # Log app start up after initialization
 logger.info("Portfolio Analyzer API starting up.")
+
+# Attach the limiter to the app state
+app.state.limiter = limiter
+
+# Register (add) the exception handler
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
 # Initialize CORS, provide the path to React - where frontend runs: http://localhost:3000

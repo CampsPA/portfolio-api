@@ -8,6 +8,9 @@ from ..crud import portfolio
 from ..crud import holding
 from ..services.analysis_service import run_portfolio_analysis
 import logging
+# SlowAPI
+from fastapi import Request
+from ..limiter import limiter, get_current_user_key
 
 
 # Get a logger instance
@@ -18,7 +21,8 @@ router = APIRouter(tags=['Analysis'])
 
 # Run analysis on a portfolio
 @router.post("/{portfolio_id}/analyze", status_code=status.HTTP_201_CREATED, response_model=AnalysisResponse)
-def run_analysis(portfolio_id:int, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+@limiter.limit("30/minute", key_func=get_current_user_key)
+def run_analysis(request:Request, portfolio_id:int, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
     
     # Fetch portfolio to check for ownership
     portfolio_check = portfolio.get_portfolio_by_id(db, portfolio_id)
@@ -56,7 +60,8 @@ def run_analysis(portfolio_id:int, db: Session = Depends(get_db), current_user =
 
 # Get latest analysis
 @router.get("/{portfolio_id}/analysis", response_model=AnalysisResponse)
-def get_latest_analysis(portfolio_id:int, db:Session = Depends(get_db), current_user=Depends(get_current_user)):
+@limiter.limit("30/minute", key_func=get_current_user_key)
+def get_latest_analysis(request:Request,portfolio_id:int, db:Session = Depends(get_db), current_user=Depends(get_current_user)):
     portfolio_check = portfolio.get_portfolio_by_id(db,portfolio_id)
 
     if not portfolio_check:
@@ -85,7 +90,8 @@ def get_latest_analysis(portfolio_id:int, db:Session = Depends(get_db), current_
 
 # Get all analyses
 @router.get("/{portfolio_id}/analysis/history", response_model=list[AnalysisResponse])
-def get_historical_analysis(portfolio_id:int, db:Session = Depends(get_db), current_user=Depends(get_current_user)):
+@limiter.limit("30/minute", key_func=get_current_user_key)
+def get_historical_analysis(request:Request,portfolio_id:int, db:Session = Depends(get_db), current_user=Depends(get_current_user)):
     portfolio_check = portfolio.get_portfolio_by_id(db,portfolio_id)
 
     if not portfolio_check:
