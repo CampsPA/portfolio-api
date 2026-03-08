@@ -53,9 +53,11 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
 # Initialize CORS, provide the path to React - where frontend runs: http://localhost:3000
+# CORS origins — localhost:3000 (future React app), localhost:5173 (placeholder UI dev server)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["http://localhost:3000",
+        "http://localhost:5173",],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
