@@ -14,6 +14,15 @@ from .logger import setup_logging
 from .limiter import limiter
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
+# Sentry
+import sentry_sdk
+from .config import settings
+
+
+# Initialize Sentry
+sentry_sdk.init(dsn= settings.sentry_dsn,
+    send_default_pii=True,
+)
 
 
 # Call the logging setup function *before* initializing the FastAPI app or getting other loggers
@@ -55,6 +64,8 @@ app.add_middleware(
 @app.get("/")
 def root():
     return {"message" : "Portfolio Analyzer API"}
+
+
 
 # link routes
 # The analysis and holdings require to be prefixed under portfolios since they are nested uder portfolios

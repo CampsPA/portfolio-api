@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     alpha_vantage_api_key: str
     redis_host: str
     redis_port: str
+    sentry_dsn : str
 
     model_config = SettingsConfigDict(env_file = ".env")
 

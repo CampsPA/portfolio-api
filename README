@@ -38,11 +38,9 @@ A production-ready REST API built with FastAPI for analyzing and optimizing stoc
 | GitHub Actions | CI/CD |
 | SlowAPI | rate limiting |
 | Redis | Rate limit storage |
+| Sentry | Error tracking |
 
-**Planned:**
-- Sentry error tracking
 
----
 
 ## 📦 Getting Started
 
@@ -212,13 +210,14 @@ Six tables with cascading foreign key relationships:
 | `SECRET_KEY` | JWT signing secret | `your-secret-key` |
 | `ALGORITHM` | JWT algorithm | `HS256` |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | Token expiry in minutes | `30` |
+| `SENTRY_DSN` | Error tracking | `your-sentry-dsn-here` |
 
 ---
 
 ## 🗺 Roadmap
 
-- [ ] AWS deployment (EC2 + RDS)
-- [ ] GitHub Actions CI/CD pipeline
-- [ ] Sentry error tracking
-- [ ] SlowAPI rate limiting
+- [x] AWS deployment (EC2 + RDS)
+- [x] GitHub Actions CI/CD pipeline
+- [x] Sentry error tracking
+- [x] SlowAPI rate limiting
 - [ ] Frontend dashboard
