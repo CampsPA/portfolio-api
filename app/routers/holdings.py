@@ -8,9 +8,11 @@ from ..crud import holding
 import logging
 import requests
 from ..config import settings
+import yfinance as yf
 # SlowAPI
 from fastapi import Request
 from ..limiter import limiter, get_current_user_key
+
 
 
 # Get a logger instance
@@ -18,7 +20,23 @@ logger = logging.getLogger("app.routers.holdings")
 
 router = APIRouter(tags=['Holdings'])
 
+def get_current_price(ticker):
+    import yfinance as yf
+    try:
+        data = yf.Ticker(ticker)
+        price = data.fast_info["last_price"]
+        if not price:
+            raise ValueError(f"No price found for {ticker}")
+        logger.info(f"Current price successfully found for {ticker}: {price}")
+        return float(price)
+    except Exception as e:
+        logger.error(f"Failed to fetch price for {ticker}: {e}")
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                            detail=f"Could not fetch price for {ticker}")
 
+
+
+'''
 def get_current_price(ticker):
     api_key = settings.alpha_vantage_api_key
     url = f"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={ticker}&apikey={api_key}"
@@ -39,7 +57,7 @@ def get_current_price(ticker):
         logger.error(f"Failed to fetch price for {ticker}: {e}")
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                             detail=f"Could not fetch price for {ticker}")
-
+'''
 
 
 # Add a holding to a portfolio
