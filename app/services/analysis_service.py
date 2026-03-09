@@ -6,12 +6,25 @@ import logging
 import requests
 from ..config import settings
 import time
+import yfinance as yf
 
 
 # Get a logger instance
 logger = logging.getLogger("app.services.analysis_service")
 
+def fetch_historical_prices(tickers, start_date, end_date):
+    import yfinance as yf
+    frames = {}
+    for ticker in tickers:
+        df = yf.download(ticker, start=start_date, end=end_date, progress=False)
+        if df.empty:
+            logger.error(f"No data returned for {ticker}")
+            raise ValueError(f"No data returned for {ticker}")
+        frames[ticker] = df["Close"].squeeze()
+        logger.info(f"Successfully fetched data for {ticker}")
+    return pd.DataFrame(frames)
 
+'''
 def fetch_historical_prices(tickers, start_date, end_date):
     api_key = settings.alpha_vantage_api_key
     frames = {}
@@ -30,7 +43,7 @@ def fetch_historical_prices(tickers, start_date, end_date):
         frames[ticker] = df_ticker["4. close"].astype(float)
         time.sleep(1)
     return pd.DataFrame(frames)
-
+'''
 
 # Fetches risk free rate from FRED Api
 def get_risk_free_rate():
